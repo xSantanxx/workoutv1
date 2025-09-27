@@ -1,5 +1,5 @@
-import { StyleSheet ,Text, View, Animated, Easing } from "react-native";
-import React, {useState, useEffect} from "react";
+import { StyleSheet ,Text, View, TouchableWithoutFeedback, Animated} from "react-native";
+import React, {useState, useEffect, useRef} from "react";
 
 
 
@@ -11,22 +11,48 @@ const MainScreen = () => {
     )
 }
 
-
 const WelcomeScreen = () => {
+
+    const scaleAnimate = useRef(new Animated.Value(0)).current;
+    const [isToggle, setToggle] = useState(false);
+
+    const scaleInterpolate = scaleAnimate.interpolate({
+        inputRange: [0, 1],
+        outputRange: [2, 10],
+    });
+
+    const animateElement = () => {
+        const toValue = isToggle ? 0 : 1;
+
+        Animated.timing(scaleAnimate, {
+            toValue: toValue,
+            duration: 2000,
+            useNativeDriver: true,
+        }).start(() => {setToggle(!isToggle);});
+
+    }
+
+    const animationStyle = {transform: [{ translateY: scaleInterpolate }]};
+
+    // Fix the animation of movement between left and right
     return(
         <View style={[styles.container]}>
-            <Text style={styles.begText}>Welcomee👋</Text>
+            <TouchableWithoutFeedback onPress={() => animateElement()}>
+                    <Text style={styles.begText}>Welcome👋</Text>
+            </TouchableWithoutFeedback>
         </View>
 
     );
 };
 
+
 export default function Index() {
+
   const [showWelcome, setShowWelcome] = useState(true);
 
   useEffect(() => {
       const timer = setTimeout(() => {
-          setShowWelcome(false);
+          setShowWelcome(true);
       }, 3500)
 
       return () => clearTimeout(timer);
@@ -34,6 +60,7 @@ export default function Index() {
 
     return showWelcome ? <WelcomeScreen /> : <MainScreen />;
 }
+
 
 const styles = StyleSheet.create({
     container: {
@@ -43,8 +70,10 @@ const styles = StyleSheet.create({
         alignItems: "center",
     },
     begText: {
-        fontSize: 18,
+        fontSize: 12,
         fontWeight: "bold",
+        height: 100,
+        width: 100,
     }
 })
 
